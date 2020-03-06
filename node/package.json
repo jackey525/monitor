@@ -1,0 +1,20 @@
+{
+  "name": "websocket",
+  "version": "1.0.0",
+  "description": "detect",
+  "main": "ws.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "logger": "0.0.1",
+    "prom-client": "^12.0.0",
+    "prometheus-client": "^0.1.1",
+    "prometheus-gc-stats": "^0.6.2",
+    "response-time": "^2.3.2",
+    "ws": "^7.2.1"
+  }
+}
