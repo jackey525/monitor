@@ -28,28 +28,32 @@ server.on('connection', function connection(ws) {
   //呼叫 wsCounters 計算 WebSocket 連線數
   monitorSocket.wsCounters();   
   //websocket 收到 message，目前用 '=' 隔開取得相關資訊內容
-    ws.on('message', function incoming(message) {    
-
-      if(message.includes('from')){
-        var str = message.split( '=' )
-        from = str[1];
-        clientTimestamp = str[2];
-        
-        //呼叫 wsMessageCounters 計算訊息數量
-           
-        monitorSocket.wsMessageCounters(from);
-      
-        console.log('received: %s', message);
-        ws.send(clientTimestamp);
-      }else if(message.includes('timeDiff')){ 
-            var str = message.split( '=' )
-            //呼叫 wsResponseTime 將 傳訊息花了多少時間的結果傳進去 
-            monitorSocket.wsResponseTime(str[0],parseInt(str[2]));
-        
-      } else {  //其他利用 website 的連線數
-        from = "other";
-        monitorSocket.wsCounters(from);    
-        monitorSocket.wsMessageCounters(from);
+    ws.on('message', function incoming(data) {    
+      try {
+        var msg = JSON.parse(data);
+      } catch (e) {
+        var msgdata = {
+          type: "web",
+          from: "other",
+          data: data
+        };
+        var msg = JSON.parse(JSON.stringify(msgdata));
+      }
+      console.log(msg);
+      switch(msg.type) {
+        case "message":
+          monitorSocket.wsMessageCounters(msg.from);
+          console.log('received: %s', msg);
+          ws.send(msg.startTime);
+        break;
+        case "timeDiff":
+          monitorSocket.wsResponseTime(msg.from,parseInt(msg.timeDiff));
+        break;
+        default:
+          console.log(msg.from);
+          monitorSocket.wsCounters(msg.from);    
+          monitorSocket.wsMessageCounters(msg.from);
+        break;
       }
     });
     
