@@ -13,6 +13,10 @@ function between(min, max) {
   )
 }
 
+function str2json(msg) {
+  return JSON.stringify(msg)
+}
+
 function heartbeat() {
   clearTimeout(this.pingTimeout);
   
@@ -27,8 +31,13 @@ function heartbeat() {
 
 function sendToServer() {
   startTime = Date.now();
-  client.send('from='+wsclient+"="+startTime);
-  // console.log("start timestamp = %s",startTime);
+  var msg = {
+    type: "message",
+    startTime: startTime,
+    from: wsclient,
+    date: Date.now()
+  };
+  client.send(str2json(msg));
 }
 
 console.log(wsclient+ " ready to go");
@@ -41,11 +50,15 @@ client.on('message', function incoming(data) {
     startTime = data;
     endTime = Date.now();
     timeDiff = endTime - startTime;
-    // console.log(data);
-    // console.log("end timestamp = %s",endTime);
-    // console.log("timeDiff = %s ms",timeDiff);
     
-    client.send(wsclient+"=timeDiff="+timeDiff);
+    var msg = {
+      type: "timeDiff",
+      timeDiff: timeDiff,
+      from: wsclient,
+      date: Date.now()
+    };
+    client.send(str2json(msg));
+
 });
 
 client.on('close', function clear() {
@@ -53,7 +66,6 @@ client.on('close', function clear() {
   clearTimeout(this.pingTimeout);
   clearTimeout(this.messageTimeout);
 });
-
 
 client.on('error', function onError(evt){
   console.log("Sorry , Server Error");
